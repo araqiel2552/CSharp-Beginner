@@ -1,4 +1,5 @@
 ﻿using Models;
+using OwnRpg.Part5.Models;
 
 namespace OwnRpg;
 
@@ -12,6 +13,7 @@ class Program
     {
         Hero hero = LoadOrCreateHero(saveFilePath);
         InitializeHeroInventory(hero);
+        hero.SaveState(saveFilePath);
 
         Monster monster = CreateMonster();
 
@@ -46,17 +48,18 @@ class Program
     {
         if (hero.Inventory.Count == 0)
         {
-            hero.Inventory.Add(new WeaknessPotion());
-            hero.Inventory.Add(new HealthPotion());
-            hero.Inventory.Add(_longBow);
+            hero.Inventory.Add(ItemType.Potion, new List<IInventoryable> { new HealthPotion("Health Potion"), new WeaknessPotion("Weakness Potion") });
+            hero.Inventory.Add(ItemType.Weapon, new List<IInventoryable> { _longBow });
         }
     }
 
     private static Monster CreateMonster()
     {
         Monster monster = new Monster("Goblin", 80);
-        monster.Inventory.Add(new HealthPotion());
-        monster.Inventory.Add(_diamondSword);
+
+        monster.Inventory.Add(ItemType.Potion, [new HealthPotion("Health Potion")]); // Collection initialization simplified
+        monster.Inventory.Add(ItemType.Weapon, [_diamondSword]); // Collection initialization simplified
+
         return monster;
     }
 
@@ -70,10 +73,11 @@ class Program
     {
         Console.WriteLine("\nChoose an action:");
         Console.WriteLine("1. Attack");
+
         if (hero.Inventory.Count > 0)
         {
             Console.WriteLine("2. Drop item");
-            if (hero.Inventory.Any(x => x is PotionBase))
+            if (hero.Inventory.ContainsKey(ItemType.Potion))
                 Console.WriteLine("3. Use Potion");
         }
     }
@@ -92,10 +96,10 @@ class Program
                     hero.Attack(monster);
                     break;
                 case "2":
-                    ChoosePotion(hero);
+                    DropItem(hero);
                     break;
                 case "3":
-                    DropItem(hero);
+                    ChoosePotion(hero);
                     break;
                 default:
                     Console.WriteLine("Invalid choice. Please try again.");
@@ -128,14 +132,24 @@ class Program
     private static void DropItem(Hero hero)
     {
         Console.WriteLine("Choose an item to drop:");
-        for (int i = 0; i < hero.Inventory.Count; i++)
+
+        var inventory = hero.GetItems();
+        for (int i = 0; i < inventory.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {hero.Inventory[i].GetType().Name}");
+            Console.WriteLine($"{i + 1}. {inventory[i].Name}");
         }
 
         if (int.TryParse(Console.ReadLine(), out int itemChoice) && itemChoice > 0 && itemChoice <= hero.Inventory.Count)
         {
-            hero.DropItem(hero.Inventory[itemChoice - 1]);
+            foreach (var itemType in hero.Inventory.Keys)
+            {
+                if (itemChoice <= hero.Inventory[itemType].Count)
+                {
+                    hero.DropItem(new KeyValuePair<ItemType, IInventoryable>(itemType, hero.Inventory[itemType][itemChoice - 1]));
+                    break;
+                }
+                itemChoice -= hero.Inventory[itemType].Count;
+            }
         }
         else
         {
@@ -145,10 +159,10 @@ class Program
 
     static void UsePotion<T>(Character character) where T : PotionBase
     {
-        var potion = character.Inventory.FirstOrDefault(x => x.GetType() == typeof(T));
+        var potion = character.Inventory[ItemType.Potion].OfType<T>().FirstOrDefault();
         if (potion != null)
         {
-            character.UseItem(potion);
+            character.UseItem(new KeyValuePair<ItemType, IInventoryable>(ItemType.Potion, potion));
         }
         else
         {
@@ -159,7 +173,7 @@ class Program
     static void ChoosePotion(Hero hero)
     {
         Console.WriteLine("Choose a potion to use:");
-        var potions = hero.Inventory.OfType<PotionBase>().ToList();
+        var potions = hero.Inventory[ItemType.Potion].OfType<PotionBase>().ToList();
         for (int i = 0; i < potions.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {potions[i].GetType().Name}");
@@ -167,7 +181,7 @@ class Program
 
         if (int.TryParse(Console.ReadLine(), out int potionChoice) && potionChoice > 0 && potionChoice <= potions.Count)
         {
-            hero.UseItem(potions[potionChoice - 1]);
+            hero.UseItem(new KeyValuePair<ItemType, IInventoryable>(ItemType.Potion, potions[potionChoice - 1]));
         }
         else
         {

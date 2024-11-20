@@ -2,7 +2,7 @@ namespace Models;
 
 public class WeaknessPotion : PotionBase
 {
-    public WeaknessPotion() : base("Weakness Potion") { }
+    public WeaknessPotion(string name) : base(name) { }
 
     public override void Effect(Character character)
     {

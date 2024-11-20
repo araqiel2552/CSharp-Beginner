@@ -5,4 +5,7 @@ using System.Threading.Tasks;
 
 namespace Models;
 
-public record WeaponBase(string Name, int Damage) : IInventoryable;
+public record WeaponBase(string Name, int Damage) : IInventoryable
+{
+    public string ClassName => GetType().Name;
+}

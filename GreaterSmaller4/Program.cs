@@ -1,35 +1,49 @@
 ﻿using System;
 
-while (true)
+bool exit = false;
+do
 {
-    // Display menu
-    Console.WriteLine("Choose an option:");
-    Console.WriteLine("1. Find Greater Value");
-    Console.WriteLine("2. Find Smaller Value");
-    Console.WriteLine("3. Exit");
+    // Get user input
+    Console.WriteLine("Enter the first value:");
+    int value1 = int.Parse(Console.ReadLine());
 
-    if (int.TryParse(Console.ReadLine(), out int choice))
+    Console.WriteLine("Enter the second value:");
+    int value2 = int.Parse(Console.ReadLine());
+
+    while (true)
     {
-        switch (choice)
+        // Display menu
+        Console.WriteLine("Choose an option:");
+        Console.WriteLine("1. Find Greater Value");
+        Console.WriteLine("2. Find Smaller Value");
+        Console.WriteLine("3. Exit");
+
+        if (int.TryParse(Console.ReadLine(), out int choice))
         {
-            case 1:
-                CompareGreaterThan(value1, value2);
-                break;
-            case 2:
-                CompareSmallerThan(value1, value2);
-                break;
-            case 3:
-                return; // Exit the program
-            default:
-                Console.WriteLine("Invalid choice, please try again.");
-                break;
+            switch (choice)
+            {
+                case 1:
+                    CompareGreaterThan(value1, value2);
+                    break;
+                case 2:
+                    CompareSmallerThan(value1, value2);
+                    break;
+                case 3:
+                    return; // Exit the program
+                default:
+                    Console.WriteLine("Invalid choice, please try again.");
+                    break;
+            }
+
+            Console.WriteLine("Do you want to continue? (Y/N)");
+            exit = Console.ReadLine().ToUpper() == "Y";
+        }
+        else
+        {
+            Console.WriteLine("Invalid input, please enter a number.");
         }
     }
-    else
-    {
-        Console.WriteLine("Invalid input, please enter a number.");
-    }
-}
+} while (!exit);
 
 void CompareGreaterThan(int a, int b) => Compare(a, b, true);
 

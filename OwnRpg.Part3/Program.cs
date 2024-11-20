@@ -39,6 +39,12 @@ public class WeaknessPotion : PotionBase
     }
 }
 
+public enum ItemType
+{
+    Potion,
+    Weapon,
+}
+
 public abstract class Person
 {
     public string Name { get; private set; }
@@ -134,11 +140,11 @@ class Program
         // Perform actions
         hero.Attack();
         hero.Cast();
-        hero.UseItem(hero.Inventory.First(x=>x.GetType() == typeof(WeaknessPotion)));
+        hero.UseItem(hero.Inventory.First(x => x.GetType() == typeof(WeaknessPotion)));
 
         monster.Attack();
         monster.Cast();
-        monster.UseItem(monster.Inventory.First(x=>x.GetType() == typeof(HealthPotion)));
+        monster.UseItem(monster.Inventory.First(x => x.GetType() == typeof(HealthPotion)));
 
     }
 }
